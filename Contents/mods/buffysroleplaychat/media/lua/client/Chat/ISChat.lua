@@ -1,4 +1,3 @@
----@diagnostic disable: undefined-global, lowercase-global, deprecated
 
 require "ISUI/ISCollapsableWindow"
 require "ISUI/ISRichTextPanel"
@@ -10,15 +9,16 @@ ISChat.maxLine = 50;
 ISChat.focused = false;
 ISChat.allChatStreams = {}
 ISChat.allChatStreams[1] = {name = "say", command = "/say ", shortCommand = "/s ", tabID = 1};
-ISChat.allChatStreams[2] = {name = "yell", command = "/yell ", shortCommand = "/y ", tabID = 1};
+ISChat.allChatStreams[2] = {name = "gritar", command = "/gritar ", shortCommand = "/gr ", tabID = 1};
 ISChat.allChatStreams[3] = {name = "whisper", command = "/whisper ", shortCommand = "/w ", tabID = 1};
-ISChat.allChatStreams[4] = {name = "faction", command = "/faction ", shortCommand = "/f ", tabID = 1};
+ISChat.allChatStreams[4] = {name = "faccion", command = "/faccion ", shortCommand = "/f ", tabID = 1};
 ISChat.allChatStreams[5] = {name = "safehouse", command = "/safehouse ", shortCommand = "/sh ", tabID = 1};
 ISChat.allChatStreams[6] = {name = "general", command = "/all ", tabID = 1};
 ISChat.allChatStreams[7] = {name = "admin", command = "/admin ", shortCommand = "/a ", tabID = 2};
 ISChat.allChatStreams[8] = {name = "me", command = "/me ", shortCommand = "/m ", tabID = 1};
 ISChat.allChatStreams[9] = {name = "name", command = "/name ", shortCommand = "/act ", tabID = 1};
 ISChat.allChatStreams[10] = {name = "looc", command = "/looc ", shortCommand = "/l ", tabID = 1};
+ISChat.allChatStreams[11] = {name = "do", command = "/do ", shortCommand = "/d ", tabID = 1};
 ISChat.defaultTabStream = {}
 ISChat.defaultTabStream[1] = ISChat.allChatStreams[1];
 ISChat.defaultTabStream[2] = ISChat.allChatStreams[7];
@@ -515,41 +515,41 @@ function ISChat:onCommandEntered()
         -- .
         -- dont let people spam
         if string.len(command) >= 2048 then
-            getPlayer():Say("Your message was too long. Try again.");
+            getPlayer():Say("Tu mensaje es muy largo. Prueba de nuevo.");
             return;
         end
         -- .
         -- grammar
         local verb = " says, ";
         if string.len(command) <= 9 then
-            verb = " states, ";
+            verb = " dice, ";
         end
         if luautils.stringEnds(command, "?") then
-            verb = " asks, ";
+            verb = " dice, ";
         end
         if luautils.stringEnds(command, "!") then
-            verb = " exclaims, ";
+            verb = " dice, ";
         end
         -- .
-        if chatStreamName == "yell" then
+        if chatStreamName == "gritar" then
             if luautils.stringStarts(command, " ") then
                 command = command:sub(2);
             end
-            local combined = rpName .. " shouts, ''" .. command .. "''";
+            local combined = rpName .. " grita ¡¡¡'' " .. command .. "'' !!!";
             processShoutMessage(combined);
         -- .
         elseif chatStreamName == "whisper" then
             local username = proceedPM(command);
             chat.chatText.lastChatCommand = chat.chatText.lastChatCommand .. username .. " ";
         -- .
-        elseif chatStreamName == "faction" then
+        elseif chatStreamName == "faccion" then
             if luautils.stringStarts(command, " ") then
                 command = command:sub(2);
             end
-            local combined = "(Faction Radio)" .. rpName .. verb .. "''" .. command .. "''";
+            local combined = "(Faccion Radio)" .. rpName .. verb .. "''" .. command .. "''";
             command = combined;
             proceedFactionMessage(command);
-        -- .
+        --.
         elseif chatStreamName == "safehouse" then
             if luautils.stringStarts(command, " ") then
                 command = command:sub(2);
@@ -575,17 +575,17 @@ function ISChat:onCommandEntered()
         -- emotes for rp. by default it sets it to their default login username.
         -- we simply manipulate our string by adding the desired color. you can change this to anything based on https://projectzomboid.com/chat_colours.txt
         elseif chatStreamName == "me" then
-            local combined = "*purple* **" .. rpName .. command;
+            local combined = "*aqua*" .. rpName .. command;
             command = combined;
             processSayMessage(command);
         -- .
 		-- can also use /act. this sets the name that appears when we type in chat. default is getOnlineUsername. example: /name John
         elseif chatStreamName == "name" then
             rpName = command;
-            getPlayer():Say("Name updated to:" .. command);
+            getPlayer():Say("Nombre asignado a:" .. command);
 		-- for when we want to specify we are not speaking in-character. can also use /l
         elseif chatStreamName == "looc" then
-            local combined = "*teal*" .. rpName .. ": ((" .. command .. " ))";
+            local combined = "*teal*" .. rpName .. ": LOOC:" .. command .. "";
             command = combined;
             processSayMessage(command);
         -- .
@@ -594,6 +594,11 @@ function ISChat:onCommandEntered()
             command = combined;
             processGeneralMessage(command);
         -- .
+        elseif chatStreamName == "do" then
+            local combined = "*orange*" .. command;
+        command = combined;
+        processSayMessage(command);
+        -- Messi .
         end
 
     end
@@ -752,11 +757,6 @@ ISChat.addLineInChat = function(message, tabID)
     local line = message:getTextWithPrefix();
     -- pz doesnt want to expose set author to lua? thats fine. we will simply gsub. :smug:
     line = line:gsub("%[" .. message:getAuthor() .. "%]" .. "%:", "");
-    if string.find(line, "<SIZE:large>") then
-        line = line:gsub("HEY!", rpName .. " shouts, ''HEY!''");
-        line = line:gsub("OVER HERE!", rpName .. " shouts, ''OVER HERE!''");
-        line = line:gsub("HEY YOU!", rpName .. " shouts, ''HEY YOU!''");
-    end
     if message:isServerAlert() then
         ISChat.instance.servermsg = "";
         if message:isShowAuthor() then
